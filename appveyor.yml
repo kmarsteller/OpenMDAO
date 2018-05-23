@@ -1,3 +1,7 @@
+image:
+- Visual Studio 2015
+- Ubuntu
+
 build: false
 
 version: 2.0.{build}
@@ -5,65 +9,121 @@ version: 2.0.{build}
 platform:
   - x64
 
+cache:
+  - /home/appveyor/miniconda -> appveyor.yml
+
 environment:
+  APPVEYOR_SSH_BLOCK: true
+  APPVEYOR_SSH_KEY: ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAvNJyDT5P5a3Fyv/uAktt9L0roLq77RzMpWaVDSnVr/bGuK7ALnaQ1Tf75mn5/Rxg6s5gBW/GYIjL2YsAH2SYQ+4uPQpHqS7E84xWgyEu9fIuUCxQjRFoCTVPc8oQIbsd/p7PMI+Tq6/fZla3lO6CoWMzGh8zn3YP0RYa6fBu6f92DuMOrdknKX0/uMWZWF8BtyDC1A36FE+eh3/KdjMFxpTG2X4qLGR9KQlwnhrrLZugLiQqZZm9T4iaEpOmuRey8uGC1xAw8wYMqE2mGrkoUa4J+rFBsDctmuIOl/dxfXPV0XbZGIR3vRXxU6HcquN29QVDsefJpLQRY84CReAD4Q== openmdao@web103.webfaction.com
+
+  # No PowerShell on Linux
+  APPVEYOR_YML_DISABLE_PS_LINUX: true
+
+
+  #PYTHON: 2.7
+
   matrix:
     - PYTHON: 2.7
+      NUMPY: 1.12
+    - PYTHON: 2.7
+      NUMPY: 1.12
+      MPI: 1
     - PYTHON: 3.6
-
-init:
-  #Uncomment the following line to gain RDP access to an appveyor machine.
-  #Login info will appear in the console
-  #- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+      NUMPY: 1.12
+    - PY: 3.6
+      NUMPY: 1.12
+      MPI: 1
+      UPLOAD_DOCS: 1
+    - PY: 3.6
+      NUMPY: 1.14
+      MPI: 1
 
 install:
-  - set CONDA=Miniconda
-  - if "%PLATFORM%" == "x64" (set CONDA=%CONDA%-x64)
-  - echo %CONDA%
-  - set PATH=C:\%CONDA%;C:\%CONDA%\Scripts;%PATH%
-  - conda config --set always_yes yes
-  # We need to do this first as other commands may not work with older versions of conda.
-  - conda update conda
-  - conda install numpy=1.11.2 scipy nose hdf5 h5py sphinx mock pip --quiet
-  #Grab testflo for running tests, to ensure examples are run
-  - pip install redbaron
-  - pip install git+https://github.com/OpenMDAO/testflo.git
-  - pip install matplotlib
-  #We need to run these two lines to have nmake available for doctests
-  - cd "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC"
-  - vcvarsall amd64
-  - ps: |
-      If ($env:CONDA -eq "Miniconda3-x64") {
-        If ((Test-Path Env:\MSMPI_BIN)) {throw "error: MSMPI_BIN env var exists. Msmpi already installed before we go to install it."}
-        If ((Get-Command "mpiexec.exe" -ErrorAction SilentlyContinue) -ne $null) {throw "error: mpiexec.exe already exists before we go to install it"}
-        If ((Get-Command "mpirun.exe" -ErrorAction SilentlyContinue) -ne $null) {throw "error: mpirun.exe already exists before we go to install it"}
-        $client = new-object System.Net.WebClient
-        $client.DownloadFile("http://openmdao.org/dists/MSMpiSetup.exe", "$pwd\MSMpiSetup.exe")
-        .\MSMpiSetup.exe -unattend -force  | Out-Null #pipe to Out-Null in order to block until install is finished
-      }
 
-  #Do these pip installs outside of powershell
-  - if "%CONDA%" == "Miniconda3-x64" (pip install http://openmdao.org/dists/mpi4py-2.0.0-cp34-none-win_amd64.whl)
-  - if "%CONDA%" == "Miniconda3-x64" (pip install http://openmdao.org/dists/petsc4py-3.6.0-cp34-none-win_amd64.whl)
+# WINDOWS BUILD
+- cmd: |
+    set CONDA=Miniconda
+    if "%PLATFORM%" == "x64" (set CONDA=%CONDA%-x64)
+    set PATH=C:\%CONDA%;C:\%CONDA%\Scripts;%PATH%
+    conda config --set always_yes yes
+    conda update conda
+    conda install numpy=1.11.2 scipy nose hdf5 h5py sphinx mock pip --quiet
+    pip install redbaron
+    pip install testflo
+    pip install matplotlib
+- ps: |
+    cd "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC"
+    cmd.exe /c '.\vcvarsall.bat amd64'
+    cd C:\projects\openmdao*
+    pip install --upgrade pip
+    pip install -e .
 
-  #Return back to continue install of OpenMDAO
-  - cd C:\projects\blue*
-  - pip install -e .
+# LINUX BUILD
+- sh: |
+    echo The value of APPVEYOR_REPO_NAME is $APPVEYOR_REPO_NAME;
+    echo The value of APPVEYOR_PULL_REQUEST_NUMBER is $APPVEYOR_PULL_REQUEST_NUMBER;
+    if  [ "$APPVEYOR_REPO_NAME" = "kmarsteller/OpenMDAO" ] && [ "${APPVEYOR_PULL_REQUEST_NUMBER:?}" ]; then
+      MASTER_BUILD=1;
+    fi
+
+    sudo apt-get --yes --force-yes install gfortran;
+    sudo apt-get --yes --force-yes install libblas-dev;
+    sudo apt-get --yes --force-yes install liblapack-dev;
+    sudo apt-get --yes --force-yes install libopenmpi-dev;
+    sudo apt-get --yes --force-yes install openmpi-bin;
+    sudo apt-get --yes --force-yes install swig;
+
+    export CONDA="Miniconda-x64";
+    wget "https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh" -O miniconda.sh;
+    chmod +x miniconda.sh;
+    ./miniconda.sh -b  -p /home/appveyor/miniconda;
+    export PATH=/home/appveyor/miniconda/bin:/home/appveyor/bin:/home/appveyor/.local/bin:/home/appveyor/.nvm/versions/node/v4.9.1/bin:/home/appveyor/.gvm/bin:/home/appveyor/.rvm/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648@global/bin:/home/appveyor/.rvm/rubies/ruby-2.0.0-p648/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/opt/mssql-tools/bin:/usr/lib/jvm/java-9-openjdk-amd64/bin:;
+    conda config --set always_yes yes;
+    conda update conda;
+    conda create --name openmdao numpy=1.12 scipy=0.19 nose hdf5 h5py sphinx mock pip --quiet;
+    source activate openmdao;
+    export PATH=/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/pyoptsparse:/home/appveyor/miniconda/envs/openmdao/bin:/home/appveyor/miniconda/envs/openmdao/bin/python$env:PYTHON:/home/appveyor/miniconda/envs/openmdao/lib/python:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/numpy/core/include:/home/appveyor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/bin/mpicc:/sbin:/bin:;
+    pip install --upgrade pip;
+    pip install redbaron;
+    pip install testflo;
+    pip install matplotlib;
+
+    if [ "$env:MPI" ]; then
+      pip install git+https://bitbucket.org/mpi4py/mpi4py@2.0.0;
+      pip install git+https://bitbucket.org/petsc/petsc4py@3.7.0;
+    fi
+
+    #curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
+
+    git clone https://github.com/mdolab/pyoptsparse.git;
+    cd pyoptsparse;
+    #    cd pyoptsparse/pyoptsparse/pySNOPT/source;
+    #    scp -r $SNOPT_LOCATION .;
+    #    cd ../../..;
+    python setup.py install;
+
+    cd /home/appveyor/projects/openmdao-2fjra;
+    pip install -e .;
 
 test_script:
-  - ps: |
-        If ($env:CONDA -eq "Miniconda3-x64") {
-          $env:MSMPI_BIN = [System.Environment]::GetEnvironmentVariable("MSMPI_BIN","Machine")
-          $env:Path = $env:Path + ";" + $env:MSMPI_BIN
-          If ((Get-Command "mpiexec.exe" -ErrorAction SilentlyContinue) -eq $null) {throw "error: can't find mpiexec.exe after install"}
-          cd openmdao/docs
-          nmake /f Makefile.nmake clean
-          nmake /f Makefile.nmake all
-          cd ../..
-        }
-  - testflo . -n 1 -m "ptest*"
-  - testflo . -n 1
 
-#after tests, need to cd down so that conf.py can be found for docbuild
-# - cd openmdao/docs
-# - nmake /f Makefile.nmake clean
-# - nmake /f Makefile.nmake all
+# BUILD DOCS ON LINUX ONLY
+- cmd: |
+    testflo . -n 1
+
+- sh: |
+    echo Building docs!;
+    cd openmdao/docs;
+    make clean;
+    make all;
+    cd /home/appveyor/projects/openmdao-2fjra/openmdao;
+    testflo . -n 1;
+
+deploy_script:
+
+- sh: |
+    if [ "$MASTER_BUILD" ] && [ "$env:UPLOAD_DOCS" ]; then
+      cd docs;
+      echo Uploading docs to Webfaction;
+      python /home/appveyor/projects/openmdao-2fjra/openmdao/docs/_utils/upload_doc_version.py;
+    fi
