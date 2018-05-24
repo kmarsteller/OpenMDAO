@@ -95,7 +95,7 @@ install:
 
       if [ "$env:PETSc" ]; then
         pip install mpi4py;
-        pip install petsc=$PETSc;
+        pip install petsc==$PETSc;
       fi
 
       #curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
