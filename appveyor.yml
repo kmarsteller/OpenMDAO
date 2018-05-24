@@ -48,7 +48,7 @@ install:
     set PATH=C:\%CONDA%;C:\%CONDA%\Scripts;%PATH%
     conda config --set always_yes yes
     conda update conda
-    conda install numpy=1.11.2 scipy nose hdf5 h5py sphinx mock pip --quiet
+    conda install numpy=%NUMPY% scipy nose hdf5 h5py sphinx mock pip --quiet
     pip install redbaron
     pip install testflo
     pip install matplotlib
@@ -85,7 +85,7 @@ install:
       export PATH=/home/appveyor/miniconda/bin:/home/appveyor/bin:/home/appveyor/.local/bin:/home/appveyor/.nvm/versions/node/v4.9.1/bin:/home/appveyor/.gvm/bin:/home/appveyor/.rvm/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648@global/bin:/home/appveyor/.rvm/rubies/ruby-2.0.0-p648/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/opt/mssql-tools/bin:/usr/lib/jvm/java-9-openjdk-amd64/bin:;
       conda config --set always_yes yes;
       conda update conda;
-      conda create --name openmdao numpy=1.12 scipy=0.19 nose hdf5 h5py sphinx mock pip --quiet;
+      conda create --name openmdao numpy=$env:NUMPY scipy=0.19 nose hdf5 h5py sphinx mock pip --quiet;
       source activate openmdao;
       export PATH=/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/pyoptsparse:/home/appveyor/miniconda/envs/openmdao/bin:/home/appveyor/miniconda/envs/openmdao/bin/python$env:PYTHON:/home/appveyor/miniconda/envs/openmdao/lib/python:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/numpy/core/include:/home/appveyor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/bin/mpicc:/sbin:/bin:;
       pip install --upgrade pip;
@@ -113,7 +113,8 @@ install:
 
 # display version of installed packages
 - sh: |
-    pip list
+    pip list;
+    conda list;
 
 test_script:
 
@@ -127,7 +128,12 @@ test_script:
     make clean;
     make all;
     cd /home/appveyor/projects/openmdao-2fjra/openmdao;
-    testflo . -n 1;
+
+    if [ "$UPLOAD_DOCS" ]; then
+      testflo -n 1 openmdao --coverage  --coverpkg openmdao --cover-omit \*tests/\*  --cover-omit \*devtools/\* --cover-omit \*test_suite/\* --cover-omit \*docs/\*;
+    else
+      testflo -n 1 --timeout=120 openmdao;
+    fi
 
 deploy_script:
 
