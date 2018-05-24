@@ -50,14 +50,14 @@ install:
     conda config --set always_yes yes
     conda update conda
     conda install python=%PYTHON% numpy=%NUMPY% scipy nose hdf5 h5py sphinx mock pip --quiet
-    pip install redbaron
-    pip install testflo
-    pip install matplotlib
+    pip install --user redbaron
+    pip install --user testflo
+    pip install --user matplotlib
 - ps: |
     cd "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC"
     cmd.exe /c '.\vcvarsall.bat amd64'
     cd C:\projects\openmdao*
-    pip install --upgrade pip
+    pip install --upgrade --user pip
     pip install -e .
 
 # LINUX BUILD
@@ -89,14 +89,14 @@ install:
       conda create --name openmdao numpy=$env:NUMPY scipy=0.19 nose hdf5 h5py sphinx mock pip --quiet;
       source activate openmdao;
       export PATH=/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/pyoptsparse:/home/appveyor/miniconda/envs/openmdao/bin:/home/appveyor/miniconda/envs/openmdao/bin/python$env:PYTHON:/home/appveyor/miniconda/envs/openmdao/lib/python:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/numpy/core/include:/home/appveyor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/bin/mpicc:/sbin:/bin:;
-      pip install --upgrade pip;
-      pip install redbaron;
-      pip install testflo;
-      pip install matplotlib;
+      pip install --user --upgrade pip;
+      pip install --user redbaron;
+      pip install --user testflo;
+      pip install --user matplotlib;
 
       if [ "$env:PETSc" ]; then
-        pip install mpi4py;
-        pip install petsc==$env:PETSc;
+        pip install --user mpi4py;
+        pip install --user petsc==$env:PETSc;
       fi
 
       #curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
