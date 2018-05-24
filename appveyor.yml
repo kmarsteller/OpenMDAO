@@ -13,6 +13,8 @@ cache:
   #- /home/appveyor/miniconda -> appveyor.yml
   - /home/appveyor/.cache/pip
   - /home/appveyor/miniconda
+  - C:\Users\appveyor\AppData\Local\pip\Cache
+  - C:\Miniconda-x64
 
 environment:
   APPVEYOR_SSH_BLOCK: true
@@ -57,7 +59,7 @@ install:
     cd "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC"
     cmd.exe /c '.\vcvarsall.bat amd64'
     cd C:\projects\openmdao*
-    pip install --upgrade --user pip
+    pip install --user --upgrade pip
     pip install -e .
 
 # LINUX BUILD
