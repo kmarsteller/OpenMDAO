@@ -11,6 +11,7 @@ platform:
 
 cache:
   - /home/appveyor/miniconda -> appveyor.yml
+  - /home/appveyor/.cache/pip
 
 environment:
   APPVEYOR_SSH_BLOCK: true
@@ -19,24 +20,24 @@ environment:
   # No PowerShell on Linux
   APPVEYOR_YML_DISABLE_PS_LINUX: true
 
-
-  #PYTHON: 2.7
-
   matrix:
     - PYTHON: 2.7
       NUMPY: 1.12
     - PYTHON: 2.7
       NUMPY: 1.12
-      MPI: 1
+      PETSc: 3.8.1
+    - PYTHON: 2.7
+      NUMPY: 1.12
+      PETSc: 3.9.1
     - PYTHON: 3.6
       NUMPY: 1.12
-    - PY: 3.6
+    - PYTHON: 3.6
       NUMPY: 1.12
-      MPI: 1
+      PETSc: 3.8.1
       UPLOAD_DOCS: 1
-    - PY: 3.6
+    - PYTHON: 3.6
       NUMPY: 1.14
-      MPI: 1
+      PETSc: 3.9.1
 
 install:
 
@@ -66,44 +67,53 @@ install:
       MASTER_BUILD=1;
     fi
 
-    sudo apt-get --yes --force-yes install gfortran;
-    sudo apt-get --yes --force-yes install libblas-dev;
-    sudo apt-get --yes --force-yes install liblapack-dev;
-    sudo apt-get --yes --force-yes install libopenmpi-dev;
-    sudo apt-get --yes --force-yes install openmpi-bin;
-    sudo apt-get --yes --force-yes install swig;
-
-    export CONDA="Miniconda-x64";
-    wget "https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh" -O miniconda.sh;
-    chmod +x miniconda.sh;
-    ./miniconda.sh -b  -p /home/appveyor/miniconda;
     export PATH=/home/appveyor/miniconda/bin:/home/appveyor/bin:/home/appveyor/.local/bin:/home/appveyor/.nvm/versions/node/v4.9.1/bin:/home/appveyor/.gvm/bin:/home/appveyor/.rvm/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648@global/bin:/home/appveyor/.rvm/rubies/ruby-2.0.0-p648/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/opt/mssql-tools/bin:/usr/lib/jvm/java-9-openjdk-amd64/bin:;
-    conda config --set always_yes yes;
-    conda update conda;
-    conda create --name openmdao numpy=1.12 scipy=0.19 nose hdf5 h5py sphinx mock pip --quiet;
-    source activate openmdao;
-    export PATH=/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/pyoptsparse:/home/appveyor/miniconda/envs/openmdao/bin:/home/appveyor/miniconda/envs/openmdao/bin/python$env:PYTHON:/home/appveyor/miniconda/envs/openmdao/lib/python:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/numpy/core/include:/home/appveyor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/bin/mpicc:/sbin:/bin:;
-    pip install --upgrade pip;
-    pip install redbaron;
-    pip install testflo;
-    pip install matplotlib;
 
-    if [ "$env:MPI" ]; then
-      pip install git+https://bitbucket.org/mpi4py/mpi4py@2.0.0;
-      pip install git+https://bitbucket.org/petsc/petsc4py@3.7.0;
+
+    if ! [ -d /home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages ]; then
+      sudo apt-get --yes --force-yes install gfortran;
+      sudo apt-get --yes --force-yes install libblas-dev;
+      sudo apt-get --yes --force-yes install liblapack-dev;
+      sudo apt-get --yes --force-yes install libopenmpi-dev;
+      sudo apt-get --yes --force-yes install openmpi-bin;
+      sudo apt-get --yes --force-yes install swig;
+
+      export CONDA="Miniconda-x64";
+      wget "https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh" -O miniconda.sh;
+      chmod +x miniconda.sh;
+      ./miniconda.sh -b  -p /home/appveyor/miniconda;
+      export PATH=/home/appveyor/miniconda/bin:/home/appveyor/bin:/home/appveyor/.local/bin:/home/appveyor/.nvm/versions/node/v4.9.1/bin:/home/appveyor/.gvm/bin:/home/appveyor/.rvm/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648@global/bin:/home/appveyor/.rvm/rubies/ruby-2.0.0-p648/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/opt/mssql-tools/bin:/usr/lib/jvm/java-9-openjdk-amd64/bin:;
+      conda config --set always_yes yes;
+      conda update conda;
+      conda create --name openmdao numpy=1.12 scipy=0.19 nose hdf5 h5py sphinx mock pip --quiet;
+      source activate openmdao;
+      export PATH=/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/pyoptsparse:/home/appveyor/miniconda/envs/openmdao/bin:/home/appveyor/miniconda/envs/openmdao/bin/python$env:PYTHON:/home/appveyor/miniconda/envs/openmdao/lib/python:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/numpy/core/include:/home/appveyor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/bin/mpicc:/sbin:/bin:;
+      pip install --upgrade pip;
+      pip install redbaron;
+      pip install testflo;
+      pip install matplotlib;
+
+      if [ "$env:PETSc" ]; then
+        pip install mpi4py;
+        pip install petsc=$PETSc;
+      fi
+
+      #curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
+
+      git clone https://github.com/mdolab/pyoptsparse.git;
+      cd pyoptsparse;
+      #    cd pyoptsparse/pyoptsparse/pySNOPT/source;
+      #    scp -r $SNOPT_LOCATION .;
+      #    cd ../../..;
+      python setup.py install;
     fi
 
-    #curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
-
-    git clone https://github.com/mdolab/pyoptsparse.git;
-    cd pyoptsparse;
-    #    cd pyoptsparse/pyoptsparse/pySNOPT/source;
-    #    scp -r $SNOPT_LOCATION .;
-    #    cd ../../..;
-    python setup.py install;
-
     cd /home/appveyor/projects/openmdao-2fjra;
-    pip install -e .;
+    pip install .;
+
+# display version of installed packages
+- sh: |
+    pip list
 
 test_script:
 
