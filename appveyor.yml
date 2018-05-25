@@ -53,13 +53,12 @@ install:
     conda update conda
     conda install python=%PYTHON% numpy=%NUMPY% scipy nose hdf5 h5py sphinx mock pip --quiet
     pip install --user redbaron
-    pip install --user testflo
+    sudo pip install testflo
     pip install --user matplotlib
 - ps: |
     cd "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC"
     cmd.exe /c '.\vcvarsall.bat amd64'
     cd C:\projects\openmdao*
-    pip install --user --upgrade pip
     pip install -e .
 
 # LINUX BUILD
@@ -74,12 +73,12 @@ install:
 
 
     if ! [ -d /home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages ]; then
-      sudo apt-get --yes --force-yes install gfortran;
-      sudo apt-get --yes --force-yes install libblas-dev;
-      sudo apt-get --yes --force-yes install liblapack-dev;
-      sudo apt-get --yes --force-yes install libopenmpi-dev;
-      sudo apt-get --yes --force-yes install openmpi-bin;
-      sudo apt-get --yes --force-yes install swig;
+      sudo apt-get --yes --allow install gfortran;
+      sudo apt-get --yes --allow install libblas-dev;
+      sudo apt-get --yes --allow install liblapack-dev;
+      sudo apt-get --yes --allow install libopenmpi-dev;
+      sudo apt-get --yes --allow install openmpi-bin;
+      sudo apt-get --yes --allow install swig;
 
       export CONDA="Miniconda-x64";
       wget "https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh" -O miniconda.sh;
@@ -93,7 +92,7 @@ install:
       export PATH=/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/pyoptsparse:/home/appveyor/miniconda/envs/openmdao/bin:/home/appveyor/miniconda/envs/openmdao/bin/python$env:PYTHON:/home/appveyor/miniconda/envs/openmdao/lib/python:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/numpy/core/include:/home/appveyor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/bin/mpicc:/sbin:/bin:;
       pip install --user --upgrade pip;
       pip install --user redbaron;
-      pip install --user testflo;
+      sudo pip install testflo;
       pip install --user matplotlib;
 
       if [ "$env:PETSc" ]; then
