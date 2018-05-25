@@ -26,18 +26,23 @@ environment:
   matrix:
     - PYTHON: 2.7
       NUMPY: 1.12
+
     - PYTHON: 2.7
       NUMPY: 1.12
       PETSc: 3.8.1
+
     - PYTHON: 2.7
       NUMPY: 1.12
       PETSc: 3.9.1
+
     - PYTHON: 3.6
       NUMPY: 1.12
+
     - PYTHON: 3.6
       NUMPY: 1.12
       PETSc: 3.8.1
       UPLOAD_DOCS: 1
+
     - PYTHON: 3.6
       NUMPY: 1.14
       PETSc: 3.9.1
@@ -56,16 +61,18 @@ install:
     pip install git+https://github.com/OpenMDAO/testflo.git;
     pip install --user matplotlib
 - ps: |
-    cd "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC"
-    cmd.exe /c '.\vcvarsall.bat amd64'
-    cd C:\projects\openmdao*
-    pip install -e .
+    if ( $isWindows ) {
+      cd "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC"
+      cmd.exe /c '.\vcvarsall.bat amd64'
+      cd C:\projects\openmdao*
+      pip install -e .
+    }
 
 # LINUX BUILD
 - sh: |
     echo The value of APPVEYOR_REPO_NAME is $env:APPVEYOR_REPO_NAME;
     echo The value of APPVEYOR_PULL_REQUEST_NUMBER is $APPVEYOR_PULL_REQUEST_NUMBER;
-    if  [ "$APPVEYOR_REPO_NAME" = "kmarsteller/OpenMDAO" ] && [ "${APPVEYOR_PULL_REQUEST_NUMBER:?}" ]; then
+    if  [ "$APPVEYOR_REPO_NAME" == "kmarsteller/OpenMDAO" ] && [ "${APPVEYOR_PULL_REQUEST_NUMBER:?}" ]; then
       MASTER_BUILD=1;
     fi
 
@@ -113,10 +120,7 @@ install:
     cd /home/appveyor/projects/openmdao-2fjra;
     pip install .;
 
-# display version of installed packages
-- sh: |
-    pip list;
-    conda list;
+
 
 test_script:
 
@@ -145,3 +149,9 @@ deploy_script:
       echo Uploading docs to Webfaction;
       python /home/appveyor/projects/openmdao-2fjra/openmdao/docs/_utils/upload_doc_version.py;
     fi
+
+on_finish:
+# display version of installed packages
+- sh: |
+    pip list;
+    conda list;
