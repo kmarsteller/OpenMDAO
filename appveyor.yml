@@ -63,7 +63,7 @@ install:
 
 # LINUX BUILD
 - sh: |
-    echo The value of APPVEYOR_REPO_NAME is $APPVEYOR_REPO_NAME;
+    echo The value of APPVEYOR_REPO_NAME is $env:APPVEYOR_REPO_NAME;
     echo The value of APPVEYOR_PULL_REQUEST_NUMBER is $APPVEYOR_PULL_REQUEST_NUMBER;
     if  [ "$APPVEYOR_REPO_NAME" = "kmarsteller/OpenMDAO" ] && [ "${APPVEYOR_PULL_REQUEST_NUMBER:?}" ]; then
       MASTER_BUILD=1;
