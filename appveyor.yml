@@ -1,10 +1,10 @@
 image:
-- Visual Studio 2015
+#- Visual Studio 2015
 - Ubuntu
 
-build: false
+#build: false
 
-version: 2.0.{build}
+#version: 2.0.{build}
 
 platform:
   - x64
@@ -13,8 +13,8 @@ cache:
   #- /home/appveyor/miniconda -> appveyor.yml
   - /home/appveyor/.cache/pip
   - /home/appveyor/miniconda
-  - C:\Users\appveyor\AppData\Local\pip\Cache
-  - C:\Miniconda-x64
+  #- C:\Users\appveyor\AppData\Local\pip\Cache
+  #- C:\Miniconda-x64
 
 environment:
   APPVEYOR_SSH_BLOCK: true
@@ -24,49 +24,49 @@ environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
 
   matrix:
-    - PYTHON: 2.7
-      NUMPY: 1.12
+#    - PY: 2.7
+#      NUMPY: 1.12
+#
+#    - PY: 2.7
+#      NUMPY: 1.12
+#      PETSc: 3.8.1
 
-    - PYTHON: 2.7
-      NUMPY: 1.12
-      PETSc: 3.8.1
-
-    - PYTHON: 2.7
+    - PY: 2.7
       NUMPY: 1.12
       PETSc: 3.9.1
 
-    - PYTHON: 3.6
-      NUMPY: 1.12
+#    - PY: 3.6
+#      NUMPY: 1.12
 
-    - PYTHON: 3.6
+    - PY: 3.6
       NUMPY: 1.12
       PETSc: 3.8.1
       UPLOAD_DOCS: 1
 
-    - PYTHON: 3.6
-      NUMPY: 1.14
-      PETSc: 3.9.1
+#    - PY: 3.6
+#      NUMPY: 1.14
+#      PETSc: 3.9.1
 
 install:
 
 # WINDOWS BUILD
-- cmd: |
-    set CONDA=Miniconda
-    if "%PLATFORM%" == "x64" (set CONDA=%CONDA%-x64)
-    set PATH=C:\%CONDA%;C:\%CONDA%\Scripts;%PATH%
-    conda config --set always_yes yes
-    conda update conda
-    conda install python=%PYTHON% numpy=%NUMPY% scipy nose hdf5 h5py sphinx mock pip --quiet
-    pip install --user redbaron
-    pip install git+https://github.com/OpenMDAO/testflo.git;
-    pip install --user matplotlib
-- ps: |
-    if ( $isWindows ) {
-      cd "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC"
-      cmd.exe /c '.\vcvarsall.bat amd64'
-      cd C:\projects\openmdao*
-      pip install -e .
-    }
+#- cmd: |
+#    set CONDA=Miniconda
+#    if "%PLATFORM%" == "x64" (set CONDA=%CONDA%-x64)
+#    set PATH=C:\%CONDA%;C:\%CONDA%\Scripts;%PATH%
+#    conda config --set always_yes yes
+#    conda update conda
+#    conda install python=%PY% numpy=%NUMPY% scipy nose hdf5 h5py sphinx mock pip --quiet
+#    pip install --user redbaron
+#    pip install git+https://github.com/OpenMDAO/testflo.git;
+#    pip install --user matplotlib
+#- ps: |
+#    if ( $isWindows ) {
+#      cd "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC"
+#      cmd.exe /c '.\vcvarsall.bat amd64'
+#      cd C:\projects\openmdao*
+#      pip install -e .
+#    }
 
 # LINUX BUILD
 - sh: |
@@ -79,7 +79,7 @@ install:
     export PATH=/home/appveyor/miniconda/bin:/home/appveyor/bin:/home/appveyor/.local/bin:/home/appveyor/.nvm/versions/node/v4.9.1/bin:/home/appveyor/.gvm/bin:/home/appveyor/.rvm/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648@global/bin:/home/appveyor/.rvm/rubies/ruby-2.0.0-p648/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/opt/mssql-tools/bin:/usr/lib/jvm/java-9-openjdk-amd64/bin:;
 
 
-    if ! [ -d /home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages ]; then
+    if ! [ -d /home/appveyor/miniconda/envs/openmdao/lib/python$env:PY/site-packages ]; then
       sudo apt-get --yes install gfortran;
       sudo apt-get --yes install libblas-dev;
       sudo apt-get --yes install liblapack-dev;
@@ -94,9 +94,9 @@ install:
       export PATH=/home/appveyor/miniconda/bin:/home/appveyor/bin:/home/appveyor/.local/bin:/home/appveyor/.nvm/versions/node/v4.9.1/bin:/home/appveyor/.gvm/bin:/home/appveyor/.rvm/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648@global/bin:/home/appveyor/.rvm/rubies/ruby-2.0.0-p648/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/opt/mssql-tools/bin:/usr/lib/jvm/java-9-openjdk-amd64/bin:;
       conda config --set always_yes yes;
       conda update conda;
-      conda create --name openmdao python="$env:PYTHON" numpy="$env:NUMPY" scipy=0.19 nose hdf5 h5py sphinx mock pip --quiet;
+      conda create --name openmdao python="$env:PY" numpy="$env:NUMPY" scipy=0.19 nose hdf5 h5py sphinx mock pip --quiet;
       source activate openmdao;
-      export PATH=/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/pyoptsparse:/home/appveyor/miniconda/envs/openmdao/bin:/home/appveyor/miniconda/envs/openmdao/bin/python$env:PYTHON:/home/appveyor/miniconda/envs/openmdao/lib/python:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PYTHON/site-packages/numpy/core/include:/home/appveyor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/bin/mpicc:/sbin:/bin:;
+      export PATH=/home/appveyor/miniconda/envs/openmdao/lib/python$env:PY/site-packages:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PY/site-packages/pyoptsparse:/home/appveyor/miniconda/envs/openmdao/bin:/home/appveyor/miniconda/envs/openmdao/bin/python$env:PY:/home/appveyor/miniconda/envs/openmdao/lib/python:/home/appveyor/miniconda/envs/openmdao/lib/python$env:PY/site-packages/numpy/core/include:/home/appveyor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/bin/mpicc:/sbin:/bin:;
       pip install --user --upgrade pip;
       pip install --user redbaron;
       pip install --user testflo;
@@ -125,8 +125,8 @@ install:
 test_script:
 
 # BUILD DOCS ON LINUX ONLY
-- cmd: |
-    testflo . -n 1
+#- cmd: |
+#    testflo . -n 1
 
 - sh: |
     echo Building docs!;
