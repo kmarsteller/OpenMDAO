@@ -142,7 +142,8 @@ install:
 - pip install .;  # Not using -e on purpose here, to catch pkging errors
 
 # display summary of installed packages and their versions
-- pip list
+- pip list;
+- conda list;
 
 script:
 # make docs first
@@ -156,6 +157,7 @@ script:
 - if [ "$UPLOAD_DOCS" ]; then
     testflo -n 1 openmdao --coverage  --coverpkg openmdao --cover-omit \*tests/\*  --cover-omit \*devtools/\* --cover-omit \*test_suite/\* --cover-omit \*docs/\*;
   else
+    testflo -n 1 openmdao  -m "ptest*";
     testflo -n 1 --timeout=120 openmdao;
   fi
 
