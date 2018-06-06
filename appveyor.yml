@@ -1,8 +1,8 @@
-image:
+image: ubuntu
 #- Visual Studio 2015
-- Ubuntu
+#- Ubuntu
 
-build: false
+build: off
 
 #version: 2.0.{build}
 
