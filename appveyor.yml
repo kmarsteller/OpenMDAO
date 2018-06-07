@@ -97,7 +97,7 @@ install:
       conda config --set always_yes yes;
       conda update conda;
 
-      # conda create --name openmdao python="2.7" numpy="1.12" scipy=0.19 nose hdf5 h5py sphinx mock pip --quiet;
+      # conda create --name openmdao python="2.7" numpy="1.12" scipy=0.19 nose hdf5 h5py sphinx mock pip=10.0.1 --quiet;
       conda create --name openmdao python=2.7 numpy=1.12 scipy=0.19 nose hdf5 h5py sphinx mock pip --quiet;
       source activate openmdao;
       export PATH=/home/appveyor/miniconda/bin:/home/appveyor/bin:/home/appveyor/.local/bin:/home/appveyor/.nvm/versions/node/v4.9.1/bin:/home/appveyor/.gvm/bin:/home/appveyor/.rvm/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648/bin:/home/appveyor/.rvm/gems/ruby-2.0.0-p648@global/bin:/home/appveyor/.rvm/rubies/ruby-2.0.0-p648/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/opt/mssql-tools/bin:/usr/lib/jvm/java-9-openjdk-amd64/bin:/home/appveyor/miniconda/envs/openmdao/lib/python2.7/site-packages:/home/appveyor/miniconda/envs/openmdao/lib/python2.7/site-packages/pyoptsparse:/home/appveyor/miniconda/envs/openmdao/bin:/home/appveyor/miniconda/envs/openmdao/bin/python2.7:/home/appveyor/miniconda/envs/openmdao/lib/python:/home/appveyor/miniconda/envs/openmdao/lib/python2.7/site-packages/numpy/core/include:/home/appveyor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/bin/mpicc:/sbin:/bin:;
